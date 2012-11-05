@@ -3,13 +3,13 @@ package com.pwr.sip;
 public class BiPolarUtil {
 	public static double bipolar2double(final boolean b) 
 	{
-		return !b?0:1;
+		return b?1:-1;
 	}
 	public static double[] bipolar2double(final boolean b[]) 
 	{
 		double[] result =new double[b.length];
 		for(int i=0;i<b.length;i++)
-			result[i]=!b[i]?0:1;
+			result[i]=b[i]?1:-1;
 		return result;
 	}
 	public static double[][] bipolar2double(final boolean b[][]) 
@@ -17,18 +17,18 @@ public class BiPolarUtil {
 		double[][] result =new double[b.length][b[0].length];
 		for(int i=0;i<b.length;i++)
 			for(int l=0;l<b[0].length;l++)
-			result[i][l]=b[i][l]?1:0;
+			result[i][l]=b[i][l]?1:-1;
 		return result;
 	}
 	public static boolean double2bipolar(final double d) 
 	{
-		return d==0?true:false;
+		return d>0?true:false;
 	}
 	public static boolean[] double2bipolar(final double d[]) 
 	{
 		boolean[] result =new boolean[d.length];
 		for(int i=0;i<d.length;i++)
-			result[i]=d[i]==0?true:false;
+			result[i]=d[i]>0?true:false;
 		return result;
 	}
 	public static boolean[][] double2bipolar(final double d[][]) 
@@ -36,7 +36,7 @@ public class BiPolarUtil {
 		boolean[][] result =new boolean[d.length][d[0].length];
 		for(int i=0;i<d.length;i++)
 			for(int l=0;l<d[0].length;l++)
-			result[i][l]=d[i][l]==0?true:false;
+			result[i][l]=d[i][l]>0?true:false;
 		return result;
 	}
 }

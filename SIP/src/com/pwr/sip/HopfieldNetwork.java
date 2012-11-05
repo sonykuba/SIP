@@ -10,6 +10,7 @@ public class HopfieldNetwork {
 	 * boolean values.
 	 */
 	private Matrix weightMatrix;
+	private double learningRate=0.2;
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);
@@ -32,6 +33,14 @@ public class HopfieldNetwork {
 	 */
 	public int getSize() {
 		return this.weightMatrix.getRows();
+	}
+
+	public double getLearningRate() {
+		return learningRate;
+	}
+
+	public void setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
 	}
 
 	/**
@@ -83,10 +92,10 @@ public class HopfieldNetwork {
 	 * @throws HopfieldException
 	 *             The pattern size must match the size of this neural network.
 	 */
-	public void train(final boolean[] pattern) {
+	public void learnPseudoInversion(final boolean[] pattern) {
 		if (pattern.length != this.weightMatrix.getRows()) {
-			throw new Error("Can't train a pattern of size "
-					+ pattern.length + " on a hopfield network of size "
+			throw new Error("Can't train a pattern of size " + pattern.length
+					+ " on a hopfield network of size "
 					+ this.weightMatrix.getRows());
 		}
 
@@ -109,4 +118,23 @@ public class HopfieldNetwork {
 		this.weightMatrix = MatrixMath.add(this.weightMatrix, m4);
 
 	}
+
+	public void learnDelta(final boolean[] pattern) {
+		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil
+				.bipolar2double(pattern));
+		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil
+				.bipolar2double(present(pattern)));
+
+		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix,
+				actualMatrix);
+
+		final Matrix equationResult=MatrixMath
+				.multiplyMatrixCells(
+						MatrixMath.multiply(errorMatrix, learningRate),
+						patternMatrix);
+		final Matrix weightMatrixFix=MatrixMath.multiply(MatrixMath.transpose(equationResult),equationResult );
+		weightMatrixFix.clearDiagonal();
+		this.weightMatrix = MatrixMath.add(this.weightMatrix, weightMatrixFix);
+	}
+	
 }

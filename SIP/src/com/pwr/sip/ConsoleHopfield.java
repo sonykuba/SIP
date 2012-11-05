@@ -35,18 +35,24 @@ public class ConsoleHopfield {
 	public static void main(final String args[]) {
 
 		// Create the neural network.
-		final HopfieldNetwork network = new HopfieldNetwork(4);
+		final HopfieldNetwork network = new HopfieldNetwork(8);
 		// This pattern will be trained
-		final boolean[] pattern1 = { true, true, false, false };
+		final boolean[] pattern1 = { true, true, false, false,true, false,true,true };
 		// This pattern will be presented
-		final boolean[] pattern2 = { true, false, false, false };
+		final boolean[] pattern2 = { true, false, false, false,false,true ,true,true};
 		boolean[] result;
 
 		// train the neural network with pattern1
 		System.out.println("Training Hopfield network with: "
 				+ formatBoolean(pattern1));
-		network.train(pattern1);
-		// present pattern1 and see it recognized
+		//network.learnPseudoInversion(pattern1);
+
+		for(int i=0;i<10;i++){
+			network.learnDelta(pattern1);
+			network.learnDelta(pattern2);
+			network.getMatrix().show();
+		}
+		
 		result = network.present(pattern1);
 		System.out.println("Presenting pattern:" + formatBoolean(pattern1)
 				+ ", and got " + formatBoolean(result));

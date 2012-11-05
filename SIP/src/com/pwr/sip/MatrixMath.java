@@ -95,5 +95,14 @@ public class MatrixMath {
 		}
 		return new Matrix(result);
 	}
-
+	public static Matrix multiplyMatrixCells(Matrix a, Matrix b)
+	{
+		final double result[][] = new double[a.getRows()][a.getCols()];
+		for (int row = 0; row < a.getRows(); row++) {
+			for (int col = 0; col < a.getCols(); col++) {
+				result[row][col] = a.get(row, col) * b.get(row, col);
+			}
+		}
+		return new Matrix(result);
+	}
 }

@@ -30,8 +30,8 @@ public class Matrix {
 	}
 
 	public static Matrix createRowMatrix(double[] bipolar2double) {
-		Matrix result = new Matrix(1,bipolar2double.length);
-		for(int i=0;i<bipolar2double.length;i++)
+		Matrix result = new Matrix(1, bipolar2double.length);
+		for (int i = 0; i < bipolar2double.length; i++)
 			result.set(0, i, bipolar2double[i]);
 		return result;
 	}
@@ -55,5 +55,21 @@ public class Matrix {
 				result[l * N + i] = data[l][i];
 			}
 		return result;
+	}
+
+	public void show() {
+		System.out.println("");
+		for (int i = 0; i < M; i++) {
+			String temp = "";
+			for (int l = 0; l < N; l++)
+				temp += data[i][l] + " ";
+			System.out.println(temp);
+		}
+
+	}
+
+	public void clearDiagonal() {
+		for (int i = 0; i < M; i++)
+			data[i][i] = 0;
 	}
 }
