@@ -39,4 +39,21 @@ public class BiPolarUtil {
 			result[i][l]=d[i][l]>0?true:false;
 		return result;
 	}
+	public static boolean[] double2d_2_1dbipolar(final double[][] pixelArray) 
+	{
+		boolean[] result =new boolean[pixelArray.length*pixelArray.length];
+		for(int i=0;i<pixelArray.length;i++)
+			for(int l=0;l<pixelArray[0].length;l++)
+				result[(i*pixelArray.length)+l]=pixelArray[i][l]>0?true:false;
+		return result;
+	}
+	
+	public static double[][] bipolar_2_2ddouble(final boolean[] b) 
+	{
+		double[][] result =new double[(int)Math.sqrt(b.length)][(int)Math.sqrt(b.length)];
+		for(int i=0;i<(int)Math.sqrt(b.length);i++)
+			for(int l=0;l<(int)Math.sqrt(b.length);l++)
+				result[i][l]=b[(i*((int)Math.sqrt(b.length)))+l]?1:-1;
+		return result;
+	}
 }

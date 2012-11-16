@@ -105,4 +105,28 @@ public class MatrixMath {
 		}
 		return new Matrix(result);
 	}
+	
+	/**
+	 * Convert a boolean array to the form [T,T,F,F]
+	 * 
+	 * @param b
+	 *            A boolen array.
+	 * @return The boolen array in string form.
+	 */
+	public static String formatBoolean(final boolean b[]) {
+		final StringBuilder result = new StringBuilder();
+		result.append('[');
+		for (int i = 0; i < b.length; i++) {
+			if (b[i]) {
+				result.append("T");
+			} else {
+				result.append("F");
+			}
+			if (i != b.length - 1) {
+				result.append(",");
+			}
+		}
+		result.append(']');
+		return (result.toString());
+	}
 }
