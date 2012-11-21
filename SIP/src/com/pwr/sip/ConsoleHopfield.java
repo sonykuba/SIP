@@ -39,18 +39,30 @@ public class ConsoleHopfield {
 		// This pattern will be trained
 		final boolean[] pattern1 = { true, true, false, false,true, false,true,true };
 		// This pattern will be presented
-		final boolean[] pattern2 = { true, false, false, false,false,true ,true,true};
+		final boolean[] pattern2 = { true, false, false, false,false,true ,true,true };
+		
+		final boolean[] pattern3 = { true, false, true, false,true,true ,true,true };
+
 		boolean[] result;
 
 		// train the neural network with pattern1
-		System.out.println("Training Hopfield network with: "
-				+ formatBoolean(pattern1));
+
 		//network.learnPseudoInversion(pattern1);
 
-		for(int i=0;i<10;i++){
-			network.learnDelta(pattern1);
-			network.learnDelta(pattern2);
+		int count=0;
+		while(true){
+			network.learnDelta(pattern1,1);
+			network.learnDelta(pattern2,2);
+			network.learnDelta(pattern3,3);
 			network.getMatrix().show();
+			if(network.errorMatrixChanged(pattern1, 1)&&network.errorMatrixChanged(pattern2, 2)&&network.errorMatrixChanged(pattern3, 3))
+				break;
+			count++;
+			network.errorMatrixUpdate(pattern1,1);
+			network.errorMatrixUpdate(pattern2,2);
+			network.errorMatrixUpdate(pattern3,3);
+
+			System.out.println("Iteration:"+count);
 		}
 		
 		result = network.present(pattern1);

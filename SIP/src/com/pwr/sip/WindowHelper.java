@@ -90,12 +90,12 @@ public class WindowHelper {
 				+ MatrixMath.formatBoolean(pattern));
 		
 		// choose patern for learning
-		for(int i=0;i<iterations;i++){
+		/*for(int i=0;i<iterations;i++){
 			if(method == 1)
 				network.learnDelta(pattern);
 			else
 				network.learnPseudoInversion(pattern);
-		}
+		}*/
 		buttonPanel.setPanelMessage("Learning process completed");
 	}
 	

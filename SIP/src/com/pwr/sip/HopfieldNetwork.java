@@ -1,5 +1,7 @@
 package com.pwr.sip;
 
+import java.util.ArrayList;
+
 public class HopfieldNetwork {
 
 	/**
@@ -10,7 +12,8 @@ public class HopfieldNetwork {
 	 * boolean values.
 	 */
 	private Matrix weightMatrix;
-	private double learningRate=0.2;
+	private double learningRate = 0.1;
+	private ArrayList<Matrix> deltaErrorMatrix = new ArrayList<Matrix>();
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);
@@ -58,8 +61,7 @@ public class HopfieldNetwork {
 
 		// convert the input pattern into a matrix with a single row.
 		// also convert the boolean values to bipolar(-1=false, 1=true)
-		final Matrix inputMatrix = Matrix.createRowMatrix(BiPolarUtil
-				.bipolar2double(pattern));
+		final Matrix inputMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
 
 		// Process each value in the pattern
 		for (int col = 0; col < pattern.length; col++) {
@@ -68,8 +70,7 @@ public class HopfieldNetwork {
 
 			// The output for this input element is the dot product of the
 			// input matrix and one column from the weight matrix.
-			final double dotProduct = MatrixMath.dotProduct(inputMatrix,
-					columnMatrix);
+			final double dotProduct = MatrixMath.dotProduct(inputMatrix, columnMatrix);
 
 			// Convert the dot product to either true or false.
 			if (dotProduct > 0) {
@@ -94,14 +95,11 @@ public class HopfieldNetwork {
 	 */
 	public void learnPseudoInversion(final boolean[] pattern) {
 		if (pattern.length != this.weightMatrix.getRows()) {
-			throw new Error("Can't train a pattern of size " + pattern.length
-					+ " on a hopfield network of size "
-					+ this.weightMatrix.getRows());
+			throw new Error("Can't train a pattern of size " + pattern.length + " on a hopfield network of size " + this.weightMatrix.getRows());
 		}
 
 		// Create a row matrix from the input, convert boolean to bipolar
-		final Matrix m2 = Matrix.createRowMatrix(BiPolarUtil
-				.bipolar2double(pattern));
+		final Matrix m2 = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
 		// Transpose the matrix and multiply by the original input matrix
 		final Matrix m1 = MatrixMath.transpose(m2);
 		final Matrix m3 = MatrixMath.multiply(m1, m2);
@@ -119,22 +117,39 @@ public class HopfieldNetwork {
 
 	}
 
-	public void learnDelta(final boolean[] pattern) {
-		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil
-				.bipolar2double(pattern));
-		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil
-				.bipolar2double(present(pattern)));
+	public void learnDelta(final boolean[] pattern, int patternNumber) {
+		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
+		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
 
-		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix,
-				actualMatrix);
-
-		final Matrix equationResult=MatrixMath
-				.multiplyMatrixCells(
-						MatrixMath.multiply(errorMatrix, learningRate),
-						patternMatrix);
-		final Matrix weightMatrixFix=MatrixMath.multiply(MatrixMath.transpose(equationResult),equationResult );
+		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
+		if (patternNumber > deltaErrorMatrix.size()) {
+			deltaErrorMatrix.add(errorMatrix);
+		}
+		final Matrix equationResult = MatrixMath.multiplyMatrixCells(MatrixMath.multiply(errorMatrix, learningRate), patternMatrix);
+		final Matrix weightMatrixFix = MatrixMath.multiply(MatrixMath.transpose(equationResult), equationResult);
 		weightMatrixFix.clearDiagonal();
 		this.weightMatrix = MatrixMath.add(this.weightMatrix, weightMatrixFix);
 	}
-	
+
+	public boolean errorMatrixChanged(final boolean[] pattern, int patternNumber) {
+		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
+		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
+
+		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
+
+		deltaErrorMatrix.get(patternNumber - 1).show();
+		errorMatrix.show();
+		return deltaErrorMatrix.get(patternNumber - 1).isTheSame(errorMatrix);
+
+	}
+
+	public void errorMatrixUpdate(final boolean[] pattern, int patternNumber) {
+		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
+		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
+
+		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
+		deltaErrorMatrix.remove(patternNumber - 1);
+		deltaErrorMatrix.add(patternNumber - 1, errorMatrix);
+	}
+
 }

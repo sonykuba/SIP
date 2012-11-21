@@ -29,6 +29,15 @@ public class Matrix {
 		return result;
 	}
 
+	public boolean isTheSame(Matrix matrix) {
+		for (int i = 0; i < N; i++)
+			for (int l = 0; l < M; l++) {
+				if (get(l, i) != matrix.get(l, i))
+					return false;
+			}
+		return true;
+	}
+
 	public static Matrix createRowMatrix(double[] bipolar2double) {
 		Matrix result = new Matrix(1, bipolar2double.length);
 		for (int i = 0; i < bipolar2double.length; i++)
@@ -65,7 +74,16 @@ public class Matrix {
 				temp += data[i][l] + " ";
 			System.out.println(temp);
 		}
+	}
 
+	public String toString() {
+		String temp = "";
+		for (int i = 0; i < M; i++) {
+			for (int l = 0; l < N; l++)
+				temp += data[i][l] + " ";
+			temp+=" \n ";
+		}
+		return temp;
 	}
 
 	public void clearDiagonal() {
