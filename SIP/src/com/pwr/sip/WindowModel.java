@@ -5,8 +5,11 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JFileChooser;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -19,10 +22,8 @@ public class WindowModel implements ActionListener
 	
 	public JFrame frame;
 	private JTextField input;
-	final JFileChooser fc = new JFileChooser(".");
-	
+
 	HopfieldNetwork network;
-	
 	
 	public WindowModel()
 	{
@@ -95,9 +96,25 @@ public class WindowModel implements ActionListener
 		
 		if(source == buttonPanel.getButton(0)) // TRAIN
 		{
-
-			LearningWindow learningWindow = new LearningWindow(frame , "Learning parameters", "");
-			WindowHelper.processTraining(learningWindow.getMethod(), learningWindow.getIterations(), buttonPanel, network);			
+			boolean actionResult = false;
+			BufferedImage images[] = WindowHelper.loadImage(frame, "Choose images for learning process:");
+			if(images.length != 0)
+			{
+				ArrayList<double[][]> arrayedImages = WindowHelper.loadImagesIntoArrayList(images);
+				LearningWindow learningWindow = new LearningWindow(frame , "Learning parameters", "");
+				network = new HopfieldNetwork(arrayedImages.get(0).length*arrayedImages.get(0).length);
+				actionResult = WindowHelper.processTraining(learningWindow.getMethod(), network, arrayedImages, null);
+			}
+			else
+			{
+				LearningWindow learningWindow = new LearningWindow(frame , "Learning parameters", "");
+				network = new HopfieldNetwork(buttonPanel.getGRID_SIZE()*buttonPanel.getGRID_SIZE());
+				actionResult = WindowHelper.processTraining(learningWindow.getMethod(), network, null, buttonPanel);
+			}
+			if(actionResult == true)
+				buttonPanel.setPanelMessage("Learning process completed");
+			else
+				buttonPanel.setPanelMessage("Learning process interrupted");
 			input.setText(buttonPanel.getPanelMessage());
 			//refreshGUI(); 					// We do not refresh as it can be uncomfortable if we would like to use the same pattern to train more than once
 
@@ -113,15 +130,22 @@ public class WindowModel implements ActionListener
 		}
 		if(source == buttonPanel.getButton(2)) // LOAD IMAGE
 		{
-			buttonPanel.loadImageIntoPixelsArray(WindowHelper.loadImage(frame, fc));
-			buttonPanel.setPanelMessage("Image loaded");
-			network = new HopfieldNetwork(buttonPanel.getGRID_SIZE()*buttonPanel.getGRID_SIZE());
-			refreshGUI();
-			input.setText(buttonPanel.getPanelMessage());
+			BufferedImage images[] = WindowHelper.loadImage(frame, "Choose an image for recognition process:");
+			if(images != null && images.length == 1)
+			{
+				buttonPanel.loadImageIntoPixelsArray(images[0]);
+				buttonPanel.setPanelMessage("Image loaded");
+				refreshGUI();
+				input.setText(buttonPanel.getPanelMessage());
+			}
+			else if(images != null)
+			{
+				JOptionPane.showMessageDialog(frame, "Loaded too many images!!! (Select only one you want to read)");
+			}
 		}
 		else if(source == buttonPanel.getButton(3)) // SAVE IMAGE
 		{
-			WindowHelper.saveImage(frame, fc, buttonPanel);						
+			WindowHelper.saveImage(frame, buttonPanel);						
 			refreshGUI();
 			input.setText(buttonPanel.getPanelMessage());
 		}

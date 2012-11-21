@@ -5,38 +5,61 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class WindowHelper {
 	
-	public static BufferedImage loadImage(JFrame frame, JFileChooser fc)
+	public static BufferedImage[] loadImage(JFrame frame, String dialogTitle)
 	{
-		File imageFile;
-		int returnVal = fc.showOpenDialog(frame);
-        if(returnVal == JFileChooser.APPROVE_OPTION)
-        {
-        	imageFile = fc.getSelectedFile();	        
-        } else {
-            JOptionPane.showMessageDialog(frame, "Error when trying to open a file!");
-            imageFile = new File("droga.bmp");
-        }
-		BufferedImage image = null;
-		try {
-			image = ImageIO.read(imageFile);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
-		return image;
+		File imageFile;
+		File imageFiles[] = null;
+    	BufferedImage image = null;
+
+		
+		final JFileChooser fc = new JFileChooser(".");
+		fc.setMultiSelectionEnabled(true);
+		fc.setDialogTitle(dialogTitle);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(
+		        "BMP Images", "bmp");
+		    fc.setFileFilter(filter);
+		    int returnVal = fc.showOpenDialog(frame);
+		    if(returnVal == JFileChooser.APPROVE_OPTION)
+	        {
+	        	imageFiles = fc.getSelectedFiles();
+	        	imageFile = fc.getSelectedFile();	 
+
+	    		BufferedImage images[] = new BufferedImage[imageFiles.length];
+	    		
+				try {
+					for (int i = 0; i < imageFiles.length; i++) 
+					{
+						images[i] = ImageIO.read(imageFiles[i]);
+					}
+					image = ImageIO.read(imageFile);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return images;
+	        } else 
+	        {
+	            JOptionPane.showMessageDialog(frame, "Error when trying to open a file!");
+	            return null;
+	        }
+		    
+        
 	}
 	
-	public static void saveImage(JFrame frame, JFileChooser fc, ButtonPanel buttonPanel)
+	public static void saveImage(JFrame frame, ButtonPanel buttonPanel)
 	{
+		final JFileChooser fc = new JFileChooser(".");
 		int GRID_SIZE = buttonPanel.getGRID_SIZE();
 		File imageFile;
 		String imagePath;
@@ -76,27 +99,72 @@ public class WindowHelper {
         
 	}
 	
-	public static void processTraining(int method, int iterations, ButtonPanel buttonPanel, HopfieldNetwork network)
+	public static boolean processTraining(int method, HopfieldNetwork network, ArrayList<double[][]> arrayedImages, ButtonPanel buttonPanel)
 	{
 		if(method == 0)
 			method = 1; // Delta method from default
-		if(iterations == 0)
-			iterations = 10; // 20 iterations of learning process from default
 		
+		boolean[][] patternsArray = null;
+		
+		if(arrayedImages == null)
+		{
+			patternsArray = new boolean[1][buttonPanel.getGRID_SIZE()*buttonPanel.getGRID_SIZE()];
+			patternsArray[0] = BiPolarUtil.double2d_2_1dbipolar(buttonPanel.getPixelsArray());
+			System.out.println("Training Hopfield network with: "
+					+ MatrixMath.formatBoolean(patternsArray[0]));
+		}
+		else
+		{		
+			patternsArray = new boolean[arrayedImages.size()][];
+			for (int i = 0; i < arrayedImages.size(); i++) 
+			{
+				patternsArray[i] = new boolean[arrayedImages.get(i).length*arrayedImages.get(i).length];
+				patternsArray[i] = BiPolarUtil.double2d_2_1dbipolar(arrayedImages.get(i));
+				System.out.println("Training Hopfield network with: "
+						+ MatrixMath.formatBoolean(patternsArray[i]));
+			}
+		}
 		// This pattern will be trained
-		final boolean[] pattern = BiPolarUtil.double2d_2_1dbipolar(buttonPanel.getPixelsArray());
+		//final boolean[] pattern = BiPolarUtil.double2d_2_1dbipolar(buttonPanel.getPixelsArray());
 		// train the neural network with the pattern
-		System.out.println("Training Hopfield network with: "
-				+ MatrixMath.formatBoolean(pattern));
+		//System.out.println("Training Hopfield network with: "
+		//		+ MatrixMath.formatBoolean(pattern));
 		
 		// choose patern for learning
-		/*for(int i=0;i<iterations;i++){
-			if(method == 1)
-				network.learnDelta(pattern);
-			else
-				network.learnPseudoInversion(pattern);
-		}*/
-		buttonPanel.setPanelMessage("Learning process completed");
+		int count=0;
+		if(method == 1)
+		{		
+			
+			int patternsNotChanged = 0;
+			while(true){
+				//network.learnDelta(pattern);
+				for(int i = 0; i < patternsArray.length; i++)
+				{
+					System.out.println(patternsArray[i].length);
+					network.learnDelta(patternsArray[i], i+1);
+					if(network.errorMatrixChanged(patternsArray[i], i+1));
+						patternsNotChanged++;
+				}
+				//network.getMatrix().show();
+				if(count != 0)
+					if(patternsNotChanged == patternsArray.length)
+						break;
+				count++;
+				for(int i = 0; i < patternsArray.length; i++)
+					network.errorMatrixUpdate(patternsArray[i], i+1);
+
+				System.out.println("Iteration:"+count);
+				patternsNotChanged = 0;
+			}
+			
+		}
+		else
+		{
+			for(int i = 0; i < patternsArray.length; i++)
+				network.learnPseudoInversion(patternsArray[i]);
+		}
+		System.out.println(">>>> " + count);
+		return true;
 	}
 	
 	public static boolean[] processRecognition(ButtonPanel buttonPanel, HopfieldNetwork network)
@@ -110,5 +178,21 @@ public class WindowHelper {
 				+ ", and got " + MatrixMath.formatBoolean(result));
 		buttonPanel.setPanelMessage("Recognition completed");
 		return result;
+	}
+	public static ArrayList<double[][]> loadImagesIntoArrayList(BufferedImage bufferedImages[])
+	{
+		ArrayList<double[][]> arrayedImages = new ArrayList<double[][]>();
+		for (BufferedImage bf : bufferedImages) 
+		{
+			double[][] tmp = new double[bf.getHeight()][bf.getWidth()];
+			for (int x = 0; x < bf.getWidth(); x++) {
+			    for (int y = 0; y < bf.getHeight(); y++) 
+			    {
+			        tmp[y][x] = (double) (bf.getRGB(x, y) == 0xFFFFFFFF ? -1 : 1);
+			    }
+			}
+			arrayedImages.add(tmp);
+		}
+		return arrayedImages;
 	}
 }

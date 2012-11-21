@@ -139,6 +139,7 @@ public class HopfieldNetwork {
 
 		deltaErrorMatrix.get(patternNumber - 1).show();
 		errorMatrix.show();
+
 		return deltaErrorMatrix.get(patternNumber - 1).isTheSame(errorMatrix);
 
 	}
