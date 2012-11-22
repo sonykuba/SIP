@@ -38,6 +38,16 @@ public class Matrix {
 		return true;
 	}
 
+	public double RMS()
+	{
+		double value=0;
+		for (int i = 0; i < N; i++)
+			for (int l = 0; l < M; l++) {
+				value+=get(l, i)*get(l, i);
+			}
+		return value;
+	}
+	
 	public static Matrix createRowMatrix(double[] bipolar2double) {
 		Matrix result = new Matrix(1, bipolar2double.length);
 		for (int i = 0; i < bipolar2double.length; i++)
