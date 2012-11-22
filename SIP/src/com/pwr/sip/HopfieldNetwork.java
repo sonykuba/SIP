@@ -13,7 +13,6 @@ public class HopfieldNetwork {
 	 */
 	private Matrix weightMatrix;
 	private double learningRate = 0.5;
-	private ArrayList<Matrix> deltaErrorMatrix = new ArrayList<Matrix>();
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);
@@ -122,11 +121,8 @@ public class HopfieldNetwork {
 		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
 
 		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
-		if (patternNumber > deltaErrorMatrix.size()) {
-			deltaErrorMatrix.add(errorMatrix);
-		}
 
-		final Matrix equationResult = MatrixMath.multiply(MatrixMath.multiply(patternMatrix, learningRate), Math.sqrt(errorMatrix.RMS()));
+		final Matrix equationResult = MatrixMath.multiplyMatrixCells(MatrixMath.multiply(errorMatrix, learningRate), patternMatrix);
 		final Matrix weightMatrixFix = MatrixMath.multiply(MatrixMath.transpose(equationResult), equationResult);
 		weightMatrixFix.clearDiagonal();
 		this.weightMatrix = MatrixMath.add(this.weightMatrix, weightMatrixFix);
@@ -137,28 +133,11 @@ public class HopfieldNetwork {
 		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
 
 		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
-		// deltaErrorMatrix.get(patternNumber - 1).show();
-		// errorMatrix.show();
 
-		// return deltaErrorMatrix.get(patternNumber -
-		// 1).isTheSame(errorMatrix);
+		double value = Math.sqrt(errorMatrix.RMS());
+		System.out.println("patternNumber:" + patternNumber + " value:" + value);
+		return value == 0;
 
-		double value1 = Math.sqrt(errorMatrix.RMS());
-		double value2 = Math.sqrt(deltaErrorMatrix.get(patternNumber - 1).RMS());
-
-		System.out.println("value1:" + value1 + " value2:" + value2 + " comparision:" + (Double.compare(value1, value2) == 0));
-
-		return Double.compare(value1, value2) == 0;
-
-	}
-
-	public void errorMatrixUpdate(final boolean[] pattern, int patternNumber) {
-		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
-		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
-
-		final Matrix errorMatrix = MatrixMath.subtract(patternMatrix, actualMatrix);
-		deltaErrorMatrix.remove(patternNumber - 1);
-		deltaErrorMatrix.add(patternNumber - 1, errorMatrix);
 	}
 
 }

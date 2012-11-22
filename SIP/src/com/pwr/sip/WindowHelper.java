@@ -131,8 +131,6 @@ public class WindowHelper {
 					if (patternsNotChanged == patternsArray.length)
 						break;
 				count++;
-				for (int i = 0; i < patternsArray.length; i++)
-					network.errorMatrixUpdate(patternsArray[i], i + 1);
 
 				System.out.println("Iteration:" + count);
 				patternsNotChanged = 0;

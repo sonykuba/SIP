@@ -58,9 +58,7 @@ public class ConsoleHopfield {
 			if(network.errorMatrixChanged(pattern1, 1)&&network.errorMatrixChanged(pattern2, 2)&&network.errorMatrixChanged(pattern3, 3))
 				break;
 			count++;
-			network.errorMatrixUpdate(pattern1,1);
-			network.errorMatrixUpdate(pattern2,2);
-			network.errorMatrixUpdate(pattern3,3);
+
 
 			System.out.println("Iteration:"+count);
 		}
