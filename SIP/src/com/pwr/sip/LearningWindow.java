@@ -1,14 +1,11 @@
 package com.pwr.sip;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.CountDownLatch;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -22,12 +19,13 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.xml.transform.Source;
-
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class LearningWindow extends JDialog implements ActionListener, ListSelectionListener{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	JDialog jDialog;
 	String[] options = {"10","20", "30", "40", "50","100","150","200","500","1000"};
 	JRadioButton deltaMethod = new JRadioButton("Delta Method");
@@ -75,6 +73,8 @@ public class LearningWindow extends JDialog implements ActionListener, ListSelec
 		jDialog.setModal(true);           // Means it will wait
 		jDialog.add(CreatePanel());                   // Add your panel
 		jDialog.pack();        // Set size (probably want this relating to your panel
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        jDialog.setLocation(dim.width/2 - jDialog.getWidth()/2, dim.height/2 - jDialog.getHeight()/2);
 		jDialog.setVisible(true);
 		jDialog.setResizable(false);
 		jDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -88,7 +88,7 @@ public class LearningWindow extends JDialog implements ActionListener, ListSelec
 	
 	private JPanel CreatePanel()
 	{
-		JPanel TotalGUI = new JPanel(new GridLayout(3,2));
+		JPanel TotalGUI = new JPanel(new GridLayout(2,2));
 		
 		JPanel radioButtonPanel = new JPanel(new GridLayout(2,1));
 		
@@ -112,8 +112,8 @@ public class LearningWindow extends JDialog implements ActionListener, ListSelec
 		cancelButton.addActionListener(this);
 		TotalGUI.add(methodsField);
 		TotalGUI.add(radioButtonPanel);
-		TotalGUI.add(iterationsField);
-		TotalGUI.add(listScroller);
+		//TotalGUI.add(iterationsField);
+		//TotalGUI.add(listScroller);
 		TotalGUI.add(okButton);
 		TotalGUI.add(cancelButton);
 		

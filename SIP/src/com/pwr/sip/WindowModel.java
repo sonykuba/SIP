@@ -2,12 +2,21 @@ package com.pwr.sip;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -65,11 +74,15 @@ public class WindowModel implements ActionListener
     {
         JFrame.setDefaultLookAndFeelDecorated(true);
         frame = new JFrame("Hoppfield Network");
-
+        Toolkit tk = frame.getToolkit();
+        Image icon = tk.getImage( "icon.png"); // load application icon
+        frame.setIconImage( icon );
         // Set the content pane.
         frame.setContentPane(CreateContentPanel(20));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setLocation(dim.width/2 - frame.getWidth()/2, dim.height/2 - frame.getHeight()/2);
         frame.setVisible(true);
     }
     
@@ -100,10 +113,13 @@ public class WindowModel implements ActionListener
 			BufferedImage images[] = WindowHelper.loadImage(frame, "Choose images for learning process:");
 			if(images.length != 0)
 			{
-				ArrayList<double[][]> arrayedImages = WindowHelper.loadImagesIntoArrayList(images);
-				LearningWindow learningWindow = new LearningWindow(frame , "Learning parameters", "");
-				network = new HopfieldNetwork(arrayedImages.get(0).length*arrayedImages.get(0).length);
-				actionResult = WindowHelper.processTraining(learningWindow.getMethod(), network, arrayedImages, null);
+				if(WindowHelper.checkImagesSize(images))
+				{
+					ArrayList<boolean[]> arrayedImages = WindowHelper.loadImagesIntoBooleanList(images);
+					LearningWindow learningWindow = new LearningWindow(frame , "Learning parameters", "");
+					network = new HopfieldNetwork(arrayedImages.get(0).length);
+					actionResult = WindowHelper.processTraining(learningWindow.getMethod(), network, arrayedImages, null);
+				}
 			}
 			else
 			{
@@ -116,6 +132,7 @@ public class WindowModel implements ActionListener
 			else
 				buttonPanel.setPanelMessage("Learning process interrupted");
 			input.setText(buttonPanel.getPanelMessage());
+			WindowHelper.weightMatrixToFile(network.getMatrix(), "MacierzWag_"+(int)Math.sqrt(network.getMatrix().getCols())+"x"+(int)Math.sqrt(network.getMatrix().getCols())+"px.txt");
 			//refreshGUI(); 					// We do not refresh as it can be uncomfortable if we would like to use the same pattern to train more than once
 
 		}

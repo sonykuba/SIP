@@ -12,7 +12,7 @@ public class HopfieldNetwork {
 	 * boolean values.
 	 */
 	private Matrix weightMatrix;
-	private double learningRate = 0.5;
+	private double learningRate = 0.8;
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);

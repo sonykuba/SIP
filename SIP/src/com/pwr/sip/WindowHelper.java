@@ -3,7 +3,9 @@ package com.pwr.sip;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -88,7 +90,7 @@ public class WindowHelper {
 
 	}
 
-	public static boolean processTraining(int method, HopfieldNetwork network, ArrayList<double[][]> arrayedImages, ButtonPanel buttonPanel) {
+	public static boolean processTraining(int method, HopfieldNetwork network, ArrayList<boolean[]> arrayedImages, ButtonPanel buttonPanel) {
 		if (method == 0)
 			method = 1; // Delta method from default
 
@@ -102,7 +104,7 @@ public class WindowHelper {
 			patternsArray = new boolean[arrayedImages.size()][];
 			for (int i = 0; i < arrayedImages.size(); i++) {
 				patternsArray[i] = new boolean[arrayedImages.get(i).length * arrayedImages.get(i).length];
-				patternsArray[i] = BiPolarUtil.double2d_2_1dbipolar(arrayedImages.get(i));
+				patternsArray[i] = arrayedImages.get(i);//BiPolarUtil.double2d_2_1dbipolar(arrayedImages.get(i));
 				System.out.println("Training Hopfield network with: " + MatrixMath.formatBoolean(patternsArray[i]));
 			}
 		}
@@ -113,7 +115,7 @@ public class WindowHelper {
 		// System.out.println("Training Hopfield network with: "
 		// + MatrixMath.formatBoolean(pattern));
 
-		// choose patern for learning
+		// choose pattern for learning
 		int count = 0;
 		if (method == 1) {
 
@@ -140,7 +142,7 @@ public class WindowHelper {
 			for (int i = 0; i < patternsArray.length; i++)
 				network.learnPseudoInversion(patternsArray[i]);
 		}
-		System.out.println(">>>> " + count);
+		
 		return true;
 	}
 
@@ -167,5 +169,55 @@ public class WindowHelper {
 			arrayedImages.add(tmp);
 		}
 		return arrayedImages;
+	}
+	
+	public static ArrayList<boolean[]> loadImagesIntoBooleanList(BufferedImage bufferedImages[]) {
+		ArrayList<boolean[]> arrayedImages = new ArrayList<boolean[]>();
+		for (BufferedImage bf : bufferedImages) {
+			int pixelsSize = bf.getWidth();
+			boolean[] tmp = new boolean[pixelsSize*pixelsSize];
+			for (int x = 0; x < pixelsSize; x++) {
+				for (int y = 0; y < pixelsSize; y++) {
+					tmp[(y*pixelsSize)+x] = (bf.getRGB(x, y) == 0xFFFFFFFF ? false : true);
+				}
+			}
+			arrayedImages.add(tmp);
+			tmp = null;
+		}
+		return arrayedImages;
+	}
+	
+	public static void weightMatrixToFile(Matrix matrix, String filename)
+	{
+		try
+		{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename), true));
+			for (int i = 0; i < matrix.getRows(); i++) {
+				for (int l = 0; l < matrix.getCols(); l++)
+					bw.write(matrix.get(i, l) + " ");
+				bw.newLine();
+			}
+			bw.close();
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	public static boolean checkImagesSize(BufferedImage bi[])
+	{
+		if(bi.length > 0)
+		{
+			BufferedImage tmpImage = bi[0];
+			for (BufferedImage bufferedImage : bi) {
+				if(tmpImage.getHeight() != tmpImage.getWidth() || bufferedImage.getHeight() != bufferedImage.getWidth())
+					return false;
+				else if(tmpImage.getHeight() != bufferedImage.getHeight())
+					return false;
+			}
+			return true;
+		}
+		else
+			return false;
 	}
 }
