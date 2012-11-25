@@ -12,11 +12,17 @@ public class HopfieldNetwork {
 	 * boolean values.
 	 */
 	private Matrix weightMatrix;
-	private double learningRate = 0.8;
+	private double learningRate = 0.7;
+	private double desiredError = 2;
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);
-
+		for (int i = 0; i < size; i++)
+			for (int l = 0; l < size; l++) {
+				if (i != l)
+					this.weightMatrix.set(i, l, Math.random());
+			}
+		this.weightMatrix.clearDiagonal();
 	}
 
 	/**
@@ -96,22 +102,14 @@ public class HopfieldNetwork {
 		if (pattern.length != this.weightMatrix.getRows()) {
 			throw new Error("Can't train a pattern of size " + pattern.length + " on a hopfield network of size " + this.weightMatrix.getRows());
 		}
-
-		// Create a row matrix from the input, convert boolean to bipolar
 		final Matrix m2 = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
-		// Transpose the matrix and multiply by the original input matrix
 		final Matrix m1 = MatrixMath.transpose(m2);
 		final Matrix m3 = MatrixMath.multiply(m1, m2);
 
-		// matrix 3 should be square by now, so create an identity
-		// matrix of the same size.
 		final Matrix identity = MatrixMath.identity(m3.getRows());
 
-		// subtract the identity matrix
 		final Matrix m4 = MatrixMath.subtract(m3, identity);
 
-		// now add the calculated matrix, for this pattern, to the
-		// existing weight matrix.
 		this.weightMatrix = MatrixMath.add(this.weightMatrix, m4);
 
 	}
@@ -128,7 +126,20 @@ public class HopfieldNetwork {
 		this.weightMatrix = MatrixMath.add(this.weightMatrix, weightMatrixFix);
 	}
 
-	public boolean errorMatrixChanged(final boolean[] pattern, int patternNumber) {
+	public void learnHebb(final boolean[] pattern) {
+		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
+		for (int i = 0; i < this.weightMatrix.getCols(); i++) {
+			final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
+			for (int l = 0; l < this.weightMatrix.getRows(); l++) {
+				if (i != l) {
+					double dotRow = MatrixMath.dotProduct(patternMatrix, this.weightMatrix.getRow(l));
+					this.weightMatrix.set(i, l, this.weightMatrix.get(i, l) + (learningRate * ((actualMatrix.get(0, l) * patternMatrix.get(0, l) - actualMatrix.get(0, l) * dotRow))));
+				}
+			}
+		}
+	}
+
+	public boolean getError(final boolean[] pattern, int patternNumber) {
 		final Matrix patternMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(pattern));
 		final Matrix actualMatrix = Matrix.createRowMatrix(BiPolarUtil.bipolar2double(present(pattern)));
 
@@ -136,8 +147,16 @@ public class HopfieldNetwork {
 
 		double value = Math.sqrt(errorMatrix.RMS());
 		System.out.println("patternNumber:" + patternNumber + " value:" + value);
-		return value == 0;
+		return value < getDesiredError();
 
+	}
+
+	public double getDesiredError() {
+		return desiredError;
+	}
+
+	public void setDesiredError(double desiredError) {
+		this.desiredError = desiredError;
 	}
 
 }

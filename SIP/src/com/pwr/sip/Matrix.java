@@ -28,7 +28,14 @@ public class Matrix {
 			result.data[i][0] = data[i][col];
 		return result;
 	}
-
+	
+	public Matrix getRow(int row) {
+		Matrix result = new Matrix(1, M);
+		for (int i = 0; i < M; i++)
+			result.data[0][i] = data[row][i];
+		return result;
+	}
+	
 	public boolean isTheSame(Matrix matrix) {
 		for (int i = 0; i < N; i++)
 			for (int l = 0; l < M; l++) {
