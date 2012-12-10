@@ -14,7 +14,6 @@ public class HopfieldNetwork {
 	private Matrix weightMatrix;
 	private double learningRate = 0.9;
 	private double desiredError = 0.1;
-	private int maxIterations = 100;
 
 	public HopfieldNetwork(final int size) {
 		this.weightMatrix = new Matrix(size, size);
@@ -73,7 +72,7 @@ public class HopfieldNetwork {
 		// Process each value in the pattern
 		for (int col = 0; col < pattern.length; col++) {
 			Matrix columnMatrix = this.weightMatrix.getMatrix(0, this.weightMatrix.getRowDimension() - 1, col, col);
-			//columnMatrix = columnMatrix.transpose();
+			// columnMatrix = columnMatrix.transpose();
 
 			// The output for this input element is the dot product of the
 			// input matrix and one column from the weight matrix.
@@ -95,41 +94,39 @@ public class HopfieldNetwork {
 	 * can be trained for more than one pattern. To do this simply call the
 	 * train method more than once.
 	 * 
-	 * @param pattern
+	 * @param patternsArray
 	 *            The pattern to train on.
 	 * @throws Exception
 	 * @throws HopfieldException
 	 *             The pattern size must match the size of this neural network.
 	 */
-	public void learnPseudoInversion(final boolean[] pattern) throws Exception {
-		if (pattern.length != this.weightMatrix.getRowDimension()) {
-			throw new Error("Can't train a pattern of size " + pattern.length + " on a hopfield network of size " + this.weightMatrix.getRowDimension());
-		}
-		final Matrix m2 = new Matrix(BiPolarUtil.bipolar2double(pattern));
+	public void learnPseudoInversion(final boolean[][] patternsArray) {
+
+		final Matrix m2 = new Matrix(BiPolarUtil.bipolar2double(patternsArray));
 		final Matrix m1 = m2.transpose();
 		final Matrix m3 = m1.times(m2);
+		for (int i = 0; i < m3.getColumnDimension(); i++)
+			m3.set(i, i, 0);
 
 		final Matrix m4 = m3.inverse();
 
-		Matrix m5 = m2.times(m4).times(m1);
-		//final Matrix identity = Matrix.identity(m3.getColumnDimension(), m3.getColumnDimension());
-
-		//final Matrix m4 = m3.minus(identity);
-
-		this.weightMatrix = this.weightMatrix.plus(m5);
+		Matrix m5 = m2.times(m4);
+		Matrix m6 = m1.times(m5);
+		
+		this.weightMatrix = m6;
 
 	}
 
 	public void learnDelta(final boolean[] pattern, int patternNumber) {
 		final Matrix patternMatrix = new Matrix(BiPolarUtil.bipolar2double(pattern));
-		final Matrix A=patternMatrix.times(this.weightMatrix);
-		final Matrix B=patternMatrix.minus(A);
-		final Matrix C=patternMatrix.transpose();
-		final Matrix D=C.times(B);
+		final Matrix A = patternMatrix.times(this.weightMatrix);
+		final Matrix B = patternMatrix.minus(A);
+		final Matrix C = patternMatrix.transpose();
+		final Matrix D = C.times(B);
 
 		for (int i = 0; i < D.getColumnDimension(); i++)
 			D.set(i, i, 0);
-		this.weightMatrix = this.weightMatrix.plus(D.times(learningRate/this.weightMatrix.getColumnDimension()));
+		this.weightMatrix = this.weightMatrix.plus(D.times(learningRate / this.weightMatrix.getColumnDimension()));
 	}
 
 	public void learnHebb(final boolean[] pattern) {
@@ -147,9 +144,9 @@ public class HopfieldNetwork {
 	public boolean getError(final boolean[] pattern, int patternNumber) {
 		final Matrix patternMatrix = new Matrix(BiPolarUtil.bipolar2double(pattern));
 
-		final Matrix A=patternMatrix.times(this.weightMatrix);
-		final Matrix B=patternMatrix.minus(A);
-		
+		final Matrix A = patternMatrix.times(this.weightMatrix);
+		final Matrix B = patternMatrix.minus(A);
+
 		double value = Math.sqrt(RMS(B));
 		System.out.println("patternNumber:" + patternNumber + " value:" + value);
 		return value < getDesiredError();
@@ -162,10 +159,6 @@ public class HopfieldNetwork {
 
 	public void setDesiredError(double desiredError) {
 		this.desiredError = desiredError;
-	}
-
-	public boolean isMaxIterations(int iteration) {
-		return iteration > maxIterations;
 	}
 
 	private double RMS(Matrix errorMatrix) {

@@ -119,27 +119,27 @@ public class WindowHelper {
 		int count = 0;
 
 		int patternsNotChanged = 0;
-		while (true) {
-			for (int i = 0; i < patternsArray.length; i++) {
-				System.out.println(patternsArray[i].length);
-				if (method == 1)
-					network.learnDelta(patternsArray[i], i + 1);
-				else
-					network.learnHebb(patternsArray[i]);
+		if (method == 1)
+			while (true) {
+				for (int i = 0; i < patternsArray.length; i++) {
+					System.out.println(patternsArray[i].length);
+					if (method == 1)
+						network.learnDelta(patternsArray[i], i + 1);
 
-				if (network.getError(patternsArray[i], i + 1))
-					patternsNotChanged++;
+					if (network.getError(patternsArray[i], i + 1))
+						patternsNotChanged++;
+				}
+				// network.getMatrix().show();
+				if (count != 0)
+					if (patternsNotChanged == patternsArray.length)
+						break;
+				count++;
+
+				System.out.println("Iteration:" + count);
+				patternsNotChanged = 0;
 			}
-			// network.getMatrix().show();
-			if (count != 0)
-				if (patternsNotChanged == patternsArray.length)
-					break;
-			count++;
-
-			System.out.println("Iteration:" + count);
-			patternsNotChanged = 0;
-		}
-
+		else
+			network.learnPseudoInversion(patternsArray);
 		return true;
 	}
 
