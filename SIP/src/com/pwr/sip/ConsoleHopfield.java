@@ -54,7 +54,7 @@ public class ConsoleHopfield {
 			network.learnDelta(pattern1,1);
 			network.learnDelta(pattern2,2);
 			network.learnDelta(pattern3,3);
-			network.getMatrix().show();
+			network.getMatrix();
 			if(network.getError(pattern1, 1)&&network.getError(pattern2, 2)&&network.getError(pattern3, 3))
 				break;
 			count++;

@@ -132,7 +132,7 @@ public class WindowModel implements ActionListener
 			else
 				buttonPanel.setPanelMessage("Learning process interrupted");
 			input.setText(buttonPanel.getPanelMessage());
-			WindowHelper.weightMatrixToFile(network.getMatrix(), "MacierzWag_"+(int)Math.sqrt(network.getMatrix().getCols())+"x"+(int)Math.sqrt(network.getMatrix().getCols())+"px.txt");
+			WindowHelper.weightMatrixToFile(network.getMatrix(), "MacierzWag_"+(int)Math.sqrt(network.getMatrix().getColumnDimension())+"x"+(int)Math.sqrt(network.getMatrix().getColumnDimension())+"px.txt");
 			//refreshGUI(); 					// We do not refresh as it can be uncomfortable if we would like to use the same pattern to train more than once
 
 		}
