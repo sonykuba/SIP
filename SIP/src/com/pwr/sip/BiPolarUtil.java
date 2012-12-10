@@ -61,7 +61,7 @@ public class BiPolarUtil {
 		double[][] mat = matrix.getArray();
 		boolean[] result = new boolean[mat.length * mat[0].length];
 		for (int i = 0; i < mat.length; i++)
-			for (int l = 0; l < mat.length; l++) {
+			for (int l = 0; l < mat[0].length; l++) {
 				result[i * mat.length + l] = mat[i][l] > 0 ? true : false;
 			}
 		return result;

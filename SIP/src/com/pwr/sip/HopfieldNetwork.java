@@ -63,30 +63,10 @@ public class HopfieldNetwork {
 	 */
 	public boolean[] present(final boolean[] pattern) {
 
-		final boolean output[] = new boolean[pattern.length];
-
-		// convert the input pattern into a matrix with a single row.
-		// also convert the boolean values to bipolar(-1=false, 1=true)
 		final Matrix inputMatrix = new Matrix(BiPolarUtil.bipolar2double(pattern));
 
-		// Process each value in the pattern
-		for (int col = 0; col < pattern.length; col++) {
-			Matrix columnMatrix = this.weightMatrix.getMatrix(0, this.weightMatrix.getRowDimension() - 1, col, col);
-			// columnMatrix = columnMatrix.transpose();
-
-			// The output for this input element is the dot product of the
-			// input matrix and one column from the weight matrix.
-			final double dotProduct = inputMatrix.times(columnMatrix).get(0, 0);
-
-			// Convert the dot product to either true or false.
-			if (dotProduct > 0) {
-				output[col] = true;
-			} else {
-				output[col] = false;
-			}
-		}
-
-		return output;
+		Matrix mat = inputMatrix.times(this.weightMatrix);
+		return BiPolarUtil.matrix2bipolar(mat);
 	}
 
 	/**
@@ -112,7 +92,7 @@ public class HopfieldNetwork {
 
 		Matrix m5 = m2.times(m4);
 		Matrix m6 = m1.times(m5);
-		
+
 		this.weightMatrix = m6;
 
 	}
